@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Breast Cancer Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #151616;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .card {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      label {
+        font-weight: bold;
+        margin-top: 12px;
+        display: block;
+      }
+      input,
+      select,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 6px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+      button {
+        margin-top: 18px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 12px;
+        border-radius: 6px;
+        background: #eef2ff;
+        font-weight: bold;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Breast Cancer Prediction</h2>
+
+      <label for="mean_radius">Mean Radius</label>
+      <input
+        type="number"
+        step="any"
+        id="mean_radius"
+        placeholder="e.g. 11.42"
+      />
+
+      <label for="mean_texture">Mean Texture</label>
+      <input
+        type="number"
+        step="any"
+        id="mean_texture"
+        placeholder="e.g. 20.38"
+      />
+
+      <label for="mean_concave_points">Mean Concave Points</label>
+      <input
+        type="number"
+        step="any"
+        id="mean_concave_points"
+        placeholder="e.g. 0.047"
+      />
+
+      <label for="model_type">Model Type</label>
+      <select id="model_type">
+        <option value="LR">Logistic Regression (LR)</option>
+        <option value="DT">Decision Tree (DT)</option>
+      </select>
+
+      <button onclick="getPrediction()">Get Prediction</button>
+
+      <div id="result" class="result" style="display: none"></div>
+    </div>
+
+    <script>
+      async function getPrediction() {
+        const mean_radius = document.getElementById("mean_radius").value;
+        const mean_texture = document.getElementById("mean_texture").value;
+        const mean_concave_points = document.getElementById(
+          "mean_concave_points"
+        ).value;
+        const model_type = document.getElementById("model_type").value;
+
+        if (!mean_radius || !mean_texture || !mean_concave_points) {
+          alert("Please fill in all fields");
+          return;
+        }
+
+        const payload = {
+          model_type: model_type,
+          mean_radius: parseFloat(mean_radius),
+          mean_texture: parseFloat(mean_texture),
+          mean_concave_points: parseFloat(mean_concave_points),
+        };
+
+        try {
+          const response = await fetch("http://localhost:8000/predict", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          const resultDiv = document.getElementById("result");
+          resultDiv.style.display = "block";
+          resultDiv.innerHTML = `Model Used: ${data.model_used}<br/>Prediction: ${data.prediction}`;
+        } catch (error) {
+          alert("Error connecting to backend");
+          console.error(error);
+        }
+      }
+    </script>
+  </body>
+</html>
